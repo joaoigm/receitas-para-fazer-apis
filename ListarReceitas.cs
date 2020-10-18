@@ -21,13 +21,26 @@ namespace PequenaCozinheira.ReceitasParaFazer
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
             ILogger log)
         {
+            var filter = req.Query["filter"];
+
             var cosmosClient = new CosmosClient(Environment.GetEnvironmentVariable("CosmosClientConnectionString"));
             var database = cosmosClient.GetDatabase("pequena-cozinheira");
             var container = database.GetContainer("receitas-para-fazer");
 
             var items = container.GetItemLinqQueryable<Receita>(allowSynchronousQueryExecution: true);
 
-            return new OkObjectResult(items.AsQueryable().ToList());
+            if (filter.Count > 0) {
+                var filteredItens = items.Where( (receita) => 
+                    receita.Nome.Contains(filter) || 
+                    receita.Tipo.Contains(filter) ||
+                    receita.Fonte.Contains(filter) ||
+                    receita.Post.Titulo.Contains(filter)
+                );
+
+                return new OkObjectResult(filteredItens.ToList());
+            }
+            
+            return new OkObjectResult(items.ToList());
         }
     }
 }
