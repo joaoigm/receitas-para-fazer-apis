@@ -33,6 +33,7 @@ namespace PequenaCozinheira.ReceitasParaFazer
                 });
 
                 if ((await items.Where(i => i.Nome == receita.Nome).CountAsync()) > 0) {
+                    log.LogDebug($"Receita de ${receita.Nome} já cadastrada");
                     return new OkObjectResult(new {
                         message = "Receita já cadastrada"
                     });
